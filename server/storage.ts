@@ -6,8 +6,13 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // User operations
@@ -32,7 +37,7 @@ export interface IStorage {
   getReportsByUserId(userId: number): Promise<Report[]>;
 
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
@@ -45,7 +50,7 @@ export class MemStorage implements IStorage {
   currentScanId: number;
   currentActivityLogId: number;
   currentReportId: number;
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 
   constructor() {
     this.users = new Map();
@@ -83,7 +88,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    // Ensure role is explicitly set if it's not provided
+    const userWithRole = {
+      ...insertUser,
+      role: insertUser.role || "user"
+    };
+    const user: User = { ...userWithRole, id };
     this.users.set(id, user);
     return user;
   }
@@ -92,8 +102,12 @@ export class MemStorage implements IStorage {
   async createScan(insertScan: InsertScan): Promise<Scan> {
     const id = this.currentScanId++;
     const now = new Date();
+    const scanWithDefaults = {
+      ...insertScan,
+      findings: insertScan.findings || null
+    };
     const scan: Scan = { 
-      ...insertScan, 
+      ...scanWithDefaults, 
       id, 
       createdAt: now 
     };
@@ -129,8 +143,12 @@ export class MemStorage implements IStorage {
   async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
     const id = this.currentActivityLogId++;
     const now = new Date();
+    const logWithDefaults = {
+      ...insertLog,
+      details: insertLog.details || null
+    };
     const log: ActivityLog = { 
-      ...insertLog, 
+      ...logWithDefaults, 
       id, 
       timestamp: now 
     };
@@ -148,8 +166,12 @@ export class MemStorage implements IStorage {
   async createReport(insertReport: InsertReport): Promise<Report> {
     const id = this.currentReportId++;
     const now = new Date();
+    const reportWithDefaults = {
+      ...insertReport,
+      reportData: insertReport.reportData || null
+    };
     const report: Report = { 
-      ...insertReport, 
+      ...reportWithDefaults, 
       id, 
       createdAt: now 
     };
@@ -173,4 +195,137 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  sessionStore: any;
+
+  constructor() {
+    if (pool) {
+      this.sessionStore = new PostgresSessionStore({ 
+        pool, 
+        createTableIfMissing: true 
+      });
+    } else {
+      // Fallback to memory store if no database connection
+      this.sessionStore = new MemoryStore({
+        checkPeriod: 86400000, // prune expired entries every 24h
+      });
+    }
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    if (!db) throw new Error("Database not available");
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!db) throw new Error("Database not available");
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    if (!db) throw new Error("Database not available");
+    // Ensure role is explicitly set if it's not provided
+    const userWithRole = {
+      ...insertUser,
+      role: insertUser.role || "user"
+    };
+    const [user] = await db
+      .insert(users)
+      .values(userWithRole)
+      .returning();
+    return user;
+  }
+
+  // Scan methods
+  async createScan(insertScan: InsertScan): Promise<Scan> {
+    if (!db) throw new Error("Database not available");
+    const scanWithDefaults = {
+      ...insertScan,
+      findings: insertScan.findings || null
+    };
+    const [scan] = await db
+      .insert(scans)
+      .values(scanWithDefaults)
+      .returning();
+    return scan;
+  }
+
+  async getScan(id: number): Promise<Scan | undefined> {
+    if (!db) throw new Error("Database not available");
+    const [scan] = await db.select().from(scans).where(eq(scans.id, id));
+    return scan;
+  }
+
+  async getScansByUserId(userId: number): Promise<Scan[]> {
+    if (!db) throw new Error("Database not available");
+    return await db.select().from(scans).where(eq(scans.userId, userId));
+  }
+
+  async updateScanStatus(id: number, status: string, findings?: any): Promise<Scan | undefined> {
+    if (!db) throw new Error("Database not available");
+    const [scan] = await db
+      .update(scans)
+      .set({ 
+        status, 
+        ...(findings && { findings }) 
+      })
+      .where(eq(scans.id, id))
+      .returning();
+    return scan;
+  }
+
+  // ActivityLog methods
+  async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
+    if (!db) throw new Error("Database not available");
+    const [log] = await db
+      .insert(activityLogs)
+      .values(insertLog)
+      .returning();
+    return log;
+  }
+
+  async getActivityLogsByUserId(userId: number): Promise<ActivityLog[]> {
+    if (!db) throw new Error("Database not available");
+    return await db
+      .select()
+      .from(activityLogs)
+      .where(eq(activityLogs.userId, userId))
+      .orderBy(activityLogs.timestamp);
+  }
+
+  // Report methods
+  async createReport(insertReport: InsertReport): Promise<Report> {
+    if (!db) throw new Error("Database not available");
+    const [report] = await db
+      .insert(reports)
+      .values(insertReport)
+      .returning();
+    return report;
+  }
+
+  async getReportById(id: number): Promise<Report | undefined> {
+    if (!db) throw new Error("Database not available");
+    const [report] = await db.select().from(reports).where(eq(reports.id, id));
+    return report;
+  }
+
+  async getReportsByScanId(scanId: number): Promise<Report[]> {
+    if (!db) throw new Error("Database not available");
+    return await db.select().from(reports).where(eq(reports.scanId, scanId));
+  }
+
+  async getReportsByUserId(userId: number): Promise<Report[]> {
+    if (!db) throw new Error("Database not available");
+    return await db
+      .select()
+      .from(reports)
+      .where(eq(reports.userId, userId))
+      .orderBy(reports.createdAt);
+  }
+}
+
+// Choose storage implementation based on database availability
+export const storage = db ? new DatabaseStorage() : new MemStorage();
