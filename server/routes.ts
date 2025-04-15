@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { exec } from "child_process";
 import util from "util";
 import { z } from "zod";
 import { insertScanSchema, insertReportSchema } from "@shared/schema";
@@ -11,8 +10,7 @@ import { JSDOM } from "jsdom";
 import dns from "dns";
 import whois from "whois-json";
 
-// Promisify exec for running shell commands
-const execAsync = util.promisify(exec);
+// DNS lookup promisify (removed exec since we're using native sockets)
 
 // DNS lookup promisify
 const dnsLookupAsync = util.promisify(dns.lookup);
@@ -183,15 +181,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Simple port check using sockets
         for (const port of portsToScan) {
           try {
-            // Using a timeout to speed up the scan
-            const { stdout } = await execAsync(
-              `nc -z -w 1 ${target} ${port} && echo "open" || echo "closed"`,
-              { timeout: 5000 }
-            );
-            
-            if (stdout.trim() === "open") {
-              results.openPorts.push(port);
-            }
+            // Using native Node.js net sockets for better compatibility with shared hosting
+            await new Promise<void>((resolve, reject) => {
+              const net = require('net');
+              const socket = new net.Socket();
+              
+              socket.setTimeout(1000); // 1 second timeout
+              
+              socket.on('connect', () => {
+                results.openPorts.push(port);
+                socket.destroy();
+                resolve();
+              });
+              
+              socket.on('timeout', () => {
+                socket.destroy();
+                resolve();
+              });
+              
+              socket.on('error', () => {
+                socket.destroy();
+                resolve();
+              });
+              
+              socket.connect(port, target);
+            });
           } catch (error) {
             // Ignore individual port errors
           }

@@ -51,15 +51,20 @@ type FormValues = z.infer<typeof formSchema>;
 export function SubdomainScanner() {
   const { toast } = useToast();
   const [result, setResult] = useState<ScanResult | null>(null);
-  const [terminalOutput, setTerminalOutput] = useState({
+  type TerminalLine = {
+    text: string;
+    type: "info" | "success" | "error" | "warning" | "command" | "output";
+  };
+  
+  const [terminalOutput, setTerminalOutput] = useState<{lines: TerminalLine[]}>({
     lines: [
       { 
         text: "Subdomain Scanner Ready", 
-        type: "info" as const 
+        type: "info"
       },
       {
         text: "Enter a domain to discover subdomains",
-        type: "info" as const
+        type: "info"
       }
     ],
   });

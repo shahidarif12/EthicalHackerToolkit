@@ -69,15 +69,20 @@ type FormValues = z.infer<typeof formSchema>;
 export function SSLScanner() {
   const { toast } = useToast();
   const [result, setResult] = useState<ScanResult | null>(null);
-  const [terminalOutput, setTerminalOutput] = useState({
+  type TerminalLine = {
+    text: string;
+    type: "info" | "success" | "error" | "warning" | "command" | "output";
+  };
+  
+  const [terminalOutput, setTerminalOutput] = useState<{lines: TerminalLine[]}>({
     lines: [
       { 
         text: "SSL/TLS Certificate Scanner Ready", 
-        type: "info" as const 
+        type: "info"
       },
       {
         text: "Enter an HTTPS URL to analyze certificate and configuration",
-        type: "info" as const
+        type: "info"
       }
     ],
   });
@@ -409,7 +414,7 @@ export function SSLScanner() {
                                 vuln.severity === 'high' 
                                   ? "destructive" 
                                   : vuln.severity === 'medium' 
-                                    ? "warning" 
+                                    ? "default" 
                                     : "default"
                               }
                             >
