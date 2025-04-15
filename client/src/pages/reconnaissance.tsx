@@ -5,6 +5,8 @@ import { DnsLookup } from "@/components/security-tools/dns-lookup";
 import { Whois } from "@/components/security-tools/whois";
 import { PortScanner } from "@/components/security-tools/port-scanner";
 import { TechScanner } from "@/components/security-tools/tech-scanner";
+import { SubdomainScanner } from "@/components/security-tools/subdomain-scanner";
+import { SSLScanner } from "@/components/security-tools/ssl-scanner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ReconnaissancePage() {
@@ -34,6 +36,8 @@ export default function ReconnaissancePage() {
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>DNS information (A records, MX records, NS records)</li>
               <li>WHOIS registration data</li>
+              <li>Subdomain discovery</li>
+              <li>SSL/TLS certificate analysis</li>
               <li>Open port scanning</li>
               <li>Technology detection</li>
             </ul>
@@ -44,9 +48,11 @@ export default function ReconnaissancePage() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2">
             <TabsTrigger value="dns">DNS Lookup</TabsTrigger>
             <TabsTrigger value="whois">WHOIS</TabsTrigger>
+            <TabsTrigger value="subdomain">Subdomains</TabsTrigger>
+            <TabsTrigger value="ssl">SSL Analysis</TabsTrigger>
             <TabsTrigger value="port">Port Scanner</TabsTrigger>
             <TabsTrigger value="tech">Tech Scanner</TabsTrigger>
           </TabsList>
@@ -57,6 +63,14 @@ export default function ReconnaissancePage() {
 
           <TabsContent value="whois" className="space-y-4">
             <Whois />
+          </TabsContent>
+          
+          <TabsContent value="subdomain" className="space-y-4">
+            <SubdomainScanner />
+          </TabsContent>
+          
+          <TabsContent value="ssl" className="space-y-4">
+            <SSLScanner />
           </TabsContent>
 
           <TabsContent value="port" className="space-y-4">

@@ -15,6 +15,9 @@ import VulnerabilityScan from "@/pages/vulnerability-scan";
 import WebAutomation from "@/pages/web-automation";
 import Reports from "@/pages/reports";
 import Tutorials from "@/pages/tutorials";
+import Settings from "@/pages/settings";
+import Help from "@/pages/help";
+import Activity from "@/pages/activity";
 
 function Router() {
   return (
@@ -25,6 +28,9 @@ function Router() {
       <ProtectedRoute path="/web-automation" component={WebAutomation} />
       <ProtectedRoute path="/reports" component={Reports} />
       <ProtectedRoute path="/tutorials" component={Tutorials} />
+      <ProtectedRoute path="/settings" component={Settings} />
+      <ProtectedRoute path="/help" component={Help} />
+      <ProtectedRoute path="/activity" component={Activity} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
