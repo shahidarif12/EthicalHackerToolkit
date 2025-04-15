@@ -141,45 +141,45 @@ export default function Dashboard() {
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <Link href="/reconnaissance">
-                  <a className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input">
+                  <div className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input cursor-pointer">
                     <div>
                       <ServerOff className="h-6 w-6 text-primary mx-auto mb-1" />
                       <div className="text-sm font-medium mt-1">DNS Lookup</div>
                     </div>
-                  </a>
+                  </div>
                 </Link>
                 <Link href="/reconnaissance">
-                  <a className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input">
+                  <div className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input cursor-pointer">
                     <div>
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary mx-auto mb-1"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>
                       <div className="text-sm font-medium mt-1">WHOIS</div>
                     </div>
-                  </a>
+                  </div>
                 </Link>
                 <Link href="/reconnaissance">
-                  <a className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input">
+                  <div className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input cursor-pointer">
                     <div>
                       <Router className="h-6 w-6 text-primary mx-auto mb-1" />
                       <div className="text-sm font-medium mt-1">Port Scan</div>
                     </div>
-                  </a>
+                  </div>
                 </Link>
                 <Link href="/reconnaissance">
-                  <a className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input">
+                  <div className="card p-3 flex items-center justify-center text-center hover:bg-muted rounded-md border border-input cursor-pointer">
                     <div>
                       <Code className="h-6 w-6 text-primary mx-auto mb-1" />
                       <div className="text-sm font-medium mt-1">Technology Scan</div>
                     </div>
-                  </a>
+                  </div>
                 </Link>
               </div>
 
               <div className="flex justify-center">
                 <Link href="/reconnaissance">
-                  <a className="text-primary text-sm font-medium flex items-center">
+                  <div className="text-primary text-sm font-medium flex items-center cursor-pointer">
                     View All Tools
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 h-4 w-4"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-                  </a>
+                  </div>
                 </Link>
               </div>
             </CardContent>

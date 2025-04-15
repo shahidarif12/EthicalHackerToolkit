@@ -27,9 +27,9 @@ interface NavItemProps {
 function NavItem({ href, icon, children, active }: NavItemProps) {
   return (
     <Link href={href}>
-      <a
+      <div
         className={cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+          "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors cursor-pointer",
           active
             ? "bg-primary/10 text-primary"
             : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
@@ -37,7 +37,7 @@ function NavItem({ href, icon, children, active }: NavItemProps) {
       >
         {icon}
         <span>{children}</span>
-      </a>
+      </div>
     </Link>
   );
 }
@@ -68,10 +68,10 @@ export default function Sidebar() {
     <div className="flex h-full flex-col border-r bg-background">
       <div className="flex h-14 items-center border-b px-4">
         <Link href="/">
-          <a className="flex items-center gap-2 font-semibold text-primary">
+          <div className="flex items-center gap-2 font-semibold text-primary cursor-pointer">
             <ShieldAlert className="h-5 w-5" />
             <span>SecureTest</span>
-          </a>
+          </div>
         </Link>
       </div>
 

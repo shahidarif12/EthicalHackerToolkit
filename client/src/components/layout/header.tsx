@@ -42,13 +42,36 @@ export function Header() {
 
         <div className="flex items-center gap-2 md:hidden">
           <Link href="/">
-            <a className="flex items-center gap-2 font-semibold text-primary">
+            <div className="flex items-center gap-2 font-semibold text-primary cursor-pointer">
               <ShieldAlert className="h-5 w-5" />
               <span>SecureTest</span>
-            </a>
+            </div>
           </Link>
         </div>
 
+        <div className="hidden md:flex items-center">
+          <nav className="flex items-center text-sm text-muted-foreground space-x-1">
+            {location !== "/" && (
+              <>
+                <Link href="/">
+                  <div className="hover:text-foreground cursor-pointer">Dashboard</div>
+                </Link>
+                <span>/</span>
+                <span className="text-foreground font-medium">
+                  {location === "/reconnaissance" && "Reconnaissance"}
+                  {location === "/vulnerability-scan" && "Vulnerability Scan"}
+                  {location === "/web-automation" && "Web Automation"}
+                  {location === "/reports" && "Reports"}
+                  {location === "/tutorials" && "Tutorials"}
+                  {location === "/activity" && "Activity Log"}
+                  {location === "/settings" && "Settings"}
+                  {location === "/help" && "Help & Support"}
+                </span>
+              </>
+            )}
+          </nav>
+        </div>
+        
         <div className="flex flex-1 items-center justify-end gap-4">
           <Button
             variant="outline"
