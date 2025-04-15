@@ -112,3 +112,35 @@ export interface TerminalOutput {
     type: 'info' | 'success' | 'error' | 'warning' | 'command' | 'output';
   }>;
 }
+
+// SQL Injection Scanner types
+export interface SQLInjectionResult {
+  vulnerabilities: Array<{
+    parameter: string;
+    severity: 'high' | 'medium' | 'low';
+    details: string;
+    url: string;
+    payload: string;
+    pattern?: string;
+  }>;
+  testedUrls: string[];
+  testedParams: string[];
+  error: string | null;
+}
+
+// XSS Scanner types
+export interface XSSResult {
+  vulnerabilities: Array<{
+    type: 'Reflected' | 'DOM-based' | 'Potentially Stored';
+    location: string;
+    severity: 'high' | 'medium' | 'low';
+    context: string;
+    payload?: string;
+    description: string;
+    remediation?: string;
+  }>;
+  injectionPoints: string[];
+  securityScore: 'A' | 'B' | 'C' | 'D' | 'F' | null;
+  recommendations: string[];
+  error: string | null;
+}
